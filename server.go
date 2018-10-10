@@ -24,8 +24,12 @@ func (gs *GameServer) init() {
 }
 
 // add room to server
-func (gs *GameServer) RegisterRoom(path string, room *Room) {
-	gs.rooms[path] = room
-
+func (gs *GameServer) RegisterRoom(path string, room Room) {
+	// gs.rooms[path] = room
+	if room == nil {
+		log.Println("room instance not null")
+		return
+	}
+	room.OnInit()
 	log.Println("room added", len(gs.rooms))
 }
