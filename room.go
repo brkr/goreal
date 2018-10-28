@@ -1,23 +1,31 @@
 package goreal
 
-import "log"
-
 // game room
-type Room interface {
+type RoomEvents interface {
 	// client request to join to room
-	// onJoinRequest(client *Client) bool
+	onJoinRequest(client *Client) bool
 
 	// client joined the room
 	// onClientJoin(clietn *Client)
 
-	// when room registered
+	// when room created
 	OnInit()
+	// called each update patch
+	OnUpdate()
+	//clienttan mesaj geldiginde
+	OnMessage()
 }
 
-// room manaager
-type RoomManager struct {
+//
+type Room struct {
+	room    *RoomEvents
+	clients *[]Client
 }
 
-func (rm *RoomManager) OnInit() {
-	log.Println("deneme")
-}
+func (rm *Room) OnInit() {}
+
+func (rm *Room) OnUpdate() {}
+
+func (rm *Room) OnMessage() {}
+
+func (rm *Room) onJoinRequest(client *Client) bool { return true }
