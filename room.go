@@ -20,7 +20,7 @@ type RoomEvents interface {
 
 //
 type Room struct {
-	room       *RoomEvents
+	roomEvents *RoomEvents
 	GameServer *GameServer
 	clients    *[]Client
 }

@@ -8,13 +8,13 @@ import (
 //Game server manager.
 type GameServer struct {
 	Port  int16
-	rooms map[string]*RoomEvents
+	rooms map[string]*RoomManager
 }
 
 // create a new server
 func NewGameServer(port int16) *GameServer {
 	server := &GameServer{Port: port}
-	server.rooms = make(map[string]*RoomEvents)
+	server.rooms = make(map[string]*RoomManager)
 	server.init()
 	return server
 }
@@ -42,22 +42,27 @@ func (gs *GameServer) Start() {
 }
 
 // add room to server
-func (gs *GameServer) RegisterRoom(path string, room interface{}) {
+func (gs *GameServer) RegisterRoom(path string, roomInterface interface{}) {
 	// gs.rooms[path] = room
-	if room == nil {
+	if roomInterface == nil {
 		log.Println("room instance not null")
 		return
 	}
 
-	roomObj, ok := room.(RoomEvents)
+	roomEvents, ok := roomInterface.(RoomEvents)
 
 	if !ok {
 		log.Printf("wrong room type")
 		return
 	}
 
-	gs.rooms[path] = &roomObj
+	if _, ok := gs.rooms[path]; ok {
+		log.Println("Room already created. {}", path)
+		return
+	}
+
+	roomManager := newRoomManager(path, &roomEvents)
+
+	gs.rooms[path] = roomManager
 	log.Println("room added", len(gs.rooms))
-	roomObj.Init(gs)
-	roomObj.OnInit()
 }
