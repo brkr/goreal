@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"time"
 
 	"github.com/brkr/goreal"
 )
@@ -29,26 +27,16 @@ func (l *Lobby) onJoinRequest(client *goreal.Client) bool {
 }
 
 func (l *Lobby) OnInit() {
-	l.Room.OnInit()
 	log.Println("lobby init")
-	ticker := time.NewTicker(1 * time.Second)
-	i := 0
-	for t := range ticker.C {
-		log.Println("Tick at", t)
-		i = i + 1
-		roomName := fmt.Sprintf("room-%d", i)
 
-		log.Println("room name %s ", roomName)
-		log.Println(l.GameServer)
-
-		// l.GameServer.RegisterRoom(roomName, &Lobby{})
-	}
-
-	log.Println("denemeee")
 }
 
 func (l *Lobby) onClientJoin(clietn *goreal.Client) {
 	log.Println("lobby onClientJoin")
+}
+
+func (l *Lobby) OnUpdate(delta float64) {
+	log.Println("update game simulation delta time: ", delta)
 }
 
 func NewLobby() *Lobby {

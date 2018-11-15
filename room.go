@@ -11,11 +11,11 @@ type RoomEvents interface {
 	// when room created
 	OnInit()
 	// called each update patch
-	OnUpdate()
+	OnUpdate(delta float64)
 	//clienttan mesaj geldiginde
 	OnMessage()
 
-	Init(gs *GameServer)
+	Init(gs *GameServer, clients *[]Client)
 }
 
 //
@@ -25,13 +25,14 @@ type Room struct {
 	clients    *[]Client
 }
 
-func (rm *Room) Init(gs *GameServer) {
+func (rm *Room) Init(gs *GameServer, clients *[]Client) {
 	rm.GameServer = gs
+	rm.clients = clients
 }
 
 func (rm *Room) OnInit() {}
 
-func (rm *Room) OnUpdate() {}
+func (rm *Room) OnUpdate(delta float64) {}
 
 func (rm *Room) OnMessage() {}
 

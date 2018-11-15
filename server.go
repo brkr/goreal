@@ -61,8 +61,13 @@ func (gs *GameServer) RegisterRoom(path string, roomInterface interface{}) {
 		return
 	}
 
-	roomManager := newRoomManager(path, &roomEvents)
-
+	roomManager := newRoomManager(path, roomEvents)
 	gs.rooms[path] = roomManager
 	log.Println("room added", len(gs.rooms))
+	gs.bootstrapRoom(roomManager)
+}
+
+func (gs *GameServer) bootstrapRoom(roomManager *RoomManager) {
+	roomManager.OnInit(gs)
+	go roomManager.run()
 }
