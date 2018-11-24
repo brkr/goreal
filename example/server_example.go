@@ -7,11 +7,9 @@ import (
 )
 
 func main() {
-
 	gameServer := goreal.NewGameServer(1111)
 	log.Println(gameServer.Port)
 	lobby := &Lobby{}
-	log.Println(lobby)
 	gameServer.RegisterRoom("lobby", lobby)
 	gameServer.Start()
 }
@@ -22,16 +20,14 @@ type Lobby struct {
 
 func (l *Lobby) onJoinRequest(client *goreal.Client) bool {
 	log.Println("lobby onJoinRequest")
-
 	return true
 }
 
 func (l *Lobby) OnInit() {
-	log.Println("lobby init")
-
+	l.Room.Config.SimulationTick = 10
 }
 
-func (l *Lobby) onClientJoin(clietn *goreal.Client) {
+func (l *Lobby) onClientJoin(client *goreal.Client) {
 	log.Println("lobby onClientJoin")
 }
 

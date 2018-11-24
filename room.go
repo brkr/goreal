@@ -15,19 +15,21 @@ type RoomEvents interface {
 	//clienttan mesaj geldiginde
 	OnMessage()
 
-	Init(gs *GameServer, clients *[]Client)
+	Init(gs *GameServer, clients *[]Client, config *RoomConfig)
 }
 
 //
 type Room struct {
 	roomEvents *RoomEvents
 	GameServer *GameServer
-	clients    *[]Client
+	Clients    *[]Client
+	Config     *RoomConfig
 }
 
-func (rm *Room) Init(gs *GameServer, clients *[]Client) {
-	rm.GameServer = gs
-	rm.clients = clients
+func (r *Room) Init(gs *GameServer, clients *[]Client, config *RoomConfig) {
+	r.GameServer = gs
+	r.Clients = clients
+	r.Config = config
 }
 
 func (rm *Room) OnInit() {}
