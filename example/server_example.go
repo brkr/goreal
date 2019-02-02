@@ -24,15 +24,23 @@ func (l *Lobby) onJoinRequest(client *goreal.Client) bool {
 }
 
 func (l *Lobby) OnInit() {
-	l.Room.Config.SimulationTick = 10
+	l.Room.Config.SimulationTick = 1
 }
 
-func (l *Lobby) onClientJoin(client *goreal.Client) {
+func (l *Lobby) OnMessage(client *goreal.Client, message []byte)  {
+	log.Printf("Lobby: Message : %s", string(message))
+}
+
+func (l *Lobby) OnClientJoin(client *goreal.Client) {
 	log.Println("lobby onClientJoin")
+	client.SendMessage([]byte("hello world"))
 }
 
 func (l *Lobby) OnUpdate(delta float64) {
-	log.Println("update game simulation delta time: ", delta)
+	//log.Println("update game simulation delta time: ", delta)
+
+	l.BroadcastMessage([] byte("selam herkese"))
+
 }
 
 func NewLobby() *Lobby {

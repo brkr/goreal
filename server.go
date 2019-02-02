@@ -1,6 +1,7 @@
 package goreal
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -32,9 +33,16 @@ func (gs *GameServer) Start() {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("ws request detected")
 		//client connection starting
+		client := serveWs(hub, w, r)
+
+		// todo bu kisim gs.JoinRoom('roomName') seklinde gelistirilecek.
+		gs.rooms["lobby"].OnClientJoin(client)
 	})
 
-	err := http.ListenAndServe(":8080", nil)
+	// connection string addr:port
+	connectionString := fmt.Sprintf(":%d", gs.Port)
+
+	err := http.ListenAndServe(connectionString, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
@@ -53,6 +61,7 @@ func (gs *GameServer) RegisterRoom(path string, roomInterface interface{}) {
 
 	if !ok {
 		log.Printf("wrong room type")
+		panic("wrong room type")
 		return
 	}
 

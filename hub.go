@@ -34,9 +34,10 @@ func (h *Hub) run() {
 		select {
 		case client := <-h.register:
 			log.Println("client register")
-			log.Println(client)
 			h.clients[client] = true
+
 		case client := <-h.unregister:
+			// client was disconnected
 			log.Println("client unregister")
 
 			if _, ok := h.clients[client]; ok {
@@ -44,6 +45,7 @@ func (h *Hub) run() {
 				close(client.send)
 			}
 		case message := <-h.broadcast:
+			// send broadcast message to all clients
 			log.Println("message from client")
 			for client := range h.clients {
 				select {
