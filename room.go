@@ -15,27 +15,36 @@ type RoomEvents interface {
 	//clienttan mesaj geldiginde
 	OnMessage(client *Client, message []byte)
 
-	Init(gs *GameServer, clients map[*Client]bool, config *RoomConfig)
+	Init(gs *GameServer, clients map[*Client]bool, config *RoomConfig, operation interface{})
 
 	// client leave from the room.
 	OnLeave(client *Client)
 
-	// todo OnDisconnect()
+	// client disconnected from server
+	OnDisconnect(client *Client)
+}
+
+type RoomOperation interface {
+	// kick client from the room
+	Kick(client *Client)
 }
 
 //
 type Room struct {
 	Name string
-	roomEvents *RoomEvents
 	GameServer *GameServer
 	Clients    map[*Client]bool
 	Config     *RoomConfig
+	RoomOperation  RoomOperation
 }
 
-func (r *Room) Init(gs *GameServer, clients map[*Client]bool, config *RoomConfig) {
+func (r *Room) Init(gs *GameServer, clients map[*Client]bool, config *RoomConfig, operation interface{}) {
 	r.GameServer = gs
 	r.Clients = clients
 	r.Config = config
+
+	o := operation.(RoomOperation)
+	r.RoomOperation = o
 }
 
 func (rm *Room) OnInit() {}
@@ -49,6 +58,7 @@ func (rm *Room) OnJoinRequest(client *Client) bool { return true }
 func (rm *Room) OnClientJoin(client *Client) {}
 
 func (rm *Room) OnLeave(client *Client) {}
+func (rm *Room) OnDisconnect(client *Client) {}
 
 // tum clientlara broadcast mesaj gonderir.
 func (rm *Room) BroadcastMessage(message string) {

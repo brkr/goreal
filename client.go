@@ -71,7 +71,7 @@ func (c *Client) ListenMessage(listener interface{}) {
 	}
 }
 
-func (c *Client) RemoveListener(listener interface{}){
+func (c *Client) RemoveListener(listener interface{}) {
 	clientListener, ok := listener.(ClientListener)
 
 	if ok {
@@ -86,8 +86,9 @@ func (c *Client) RemoveListener(listener interface{}){
 // reads from this goroutine.
 func (c *Client) readPump() {
 	defer func() {
+
 		c.hub.unregister <- c
-		log.Println("client disconnecting...")
+		//log.Println("client disconnecting...")
 		c.conn.Close()
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
@@ -106,7 +107,6 @@ func (c *Client) readPump() {
 		for k, _ := range c.listeners {
 			k.ReceiveMessage(c, message)
 		}
-
 	}
 }
 

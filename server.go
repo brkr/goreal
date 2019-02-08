@@ -12,6 +12,8 @@ type GameServer struct {
 	Port int16
 	// all rooms in game server
 	rooms map[string]*RoomManager
+
+	clientRoom map[*Client]string
 	// handle client's first connection
 	InitClient func(w http.ResponseWriter, r *http.Request, client *Client)
 }
@@ -20,6 +22,7 @@ type GameServer struct {
 func NewGameServer(port int16) *GameServer {
 	server := &GameServer{Port: port}
 	server.rooms = make(map[string]*RoomManager)
+	server.clientRoom = make(map[*Client]string)
 	server.init()
 	return server
 }
@@ -32,7 +35,7 @@ func (gs *GameServer) init() {
 func (gs *GameServer) Start() {
 	log.Println("server starting..")
 	hub := newHub()
-	go hub.run()
+	go hub.run(gs)
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("ws request detected")
@@ -104,6 +107,10 @@ func (gs *GameServer) JoinRoom(roomName string, client *Client) bool {
 
 	// send client to room information
 	client.SendMessageStr("{\"join_room\":\"" + roomName + "\"}")
+
+	// keep clients room
+	gs.clientRoom[client]=roomName
+
 	room.AddClientToRoom(client)
 
 	return true
@@ -114,4 +121,22 @@ func (gs *GameServer) LeaveFromRoom(client *Client, room *Room )  {
 	client.RemoveListener(room)
 
 
+}
+
+// client disconnect unexpectedly
+func (gs *GameServer) DisconnectClient(client *Client) {
+	log.Println("Client disconnected unexpectedly")
+
+	roomName, ok := gs.clientRoom[client]
+	if !ok {
+		// client not be found any room
+		log.Println("client not be found any room")
+	}
+
+	room, isFound := gs.rooms[roomName]
+	if !isFound {
+		log.Printf("%s room not found.", roomName)
+	}
+
+	room.DisconnectClient(client)
 }

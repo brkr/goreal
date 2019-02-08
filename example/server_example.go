@@ -37,7 +37,7 @@ type Lobby struct {
 func (l *Lobby) OnJoinRequest(client *goreal.Client) bool {
 	log.Println("lobby onJoinRequest")
 
-	if len(l.Clients) >= 1 {
+	if len(l.Clients) >= 2 {
 		log.Println("room is full")
 		return false
 	}
@@ -50,7 +50,7 @@ func (l *Lobby) OnInit() {
 	l.State = &GameState{}
 }
 
-func (l *Lobby) OnMessage(client *goreal.Client, message []byte)  {
+func (l *Lobby) OnMessage(client *goreal.Client, message []byte) {
 	log.Printf("Lobby: Message : %s", string(message))
 }
 
@@ -61,8 +61,19 @@ func (l *Lobby) OnClientJoin(client *goreal.Client) {
 		client.SendMessage([]byte("You're player 1."))
 		l.State.Player1 = client
 	} else if l.State.Player2 == nil {
-		client.SendMessage([]byte("You're player 1."))
+		client.SendMessage([]byte("You're player 2."))
 		l.State.Player2 = client
+	}
+}
+
+func (l *Lobby) OnLeave(client *goreal.Client) {
+	client.SendMessageStr("You're kicked from room.")
+	if l.State.Player1 == client {
+		log.Println("Player 1 leave from room")
+		l.State.Player1 = nil
+	} else if l.State.Player2 == client {
+		log.Println("Player 2 leave from room")
+		l.State.Player2 = nil
 	}
 }
 
@@ -70,15 +81,14 @@ func (l *Lobby) OnUpdate(delta float64) {
 	//log.Println("update game simulation delta time: ", delta)
 
 	l.State.counter++
-	l.BroadcastMessage(fmt.Sprintf("Selam. State %d", l.State.counter))
+	l.BroadcastMessage(fmt.Sprintf("User Count %d .State %d", len(l.Clients), l.State.counter))
 
-	if l.State.counter % 25 == 0 && l.State.Player1 != nil  {
-		l.GameServer.
+	if l.State.counter%15 == 0 && l.State.Player1 != nil {
+		log.Println("kick")
+		l.RoomOperation.Kick(l.State.Player1)
 	}
 }
 
 func NewLobby() *Lobby {
 	return &Lobby{}
 }
-
-

@@ -9,8 +9,8 @@ import (
 
 type RoomManager struct {
 	Path       string
-	RoomEvents RoomEvents
-	clients    map[*Client]bool
+	RoomEvents RoomEvents //room
+	Clients    map[*Client]bool
 	Config     *RoomConfig
 }
 
@@ -21,18 +21,18 @@ type RoomConfig struct {
 // new room manager
 func newRoomManager(path string, roomEvents RoomEvents) *RoomManager {
 	config := &RoomConfig{MaxUser: 1000, SimulationTick: 10}
-	return &RoomManager{RoomEvents: roomEvents, Path: path, Config: config, clients: make(map[*Client]bool)}
+	return &RoomManager{RoomEvents: roomEvents, Path: path, Config: config, Clients: make(map[*Client]bool)}
 }
 
 func (rm *RoomManager) OnInit(gs *GameServer) {
 	log.Println("room init", rm.Path)
-	rm.RoomEvents.Init(gs, rm.clients, rm.Config)
+	rm.RoomEvents.Init(gs, rm.Clients, rm.Config, rm)
 }
 
 func (rm *RoomManager) CanJoinTheRoom(client *Client) bool {
 	// todo check if client already join
 
-	_, ok := rm.clients[client]
+	_, ok := rm.Clients[client]
 	if ok {
 		log.Println("Client is already join.")
 		return true
@@ -43,7 +43,7 @@ func (rm *RoomManager) CanJoinTheRoom(client *Client) bool {
 }
 func (rm *RoomManager) AddClientToRoom(client *Client) {
 
-	rm.clients[client] = true
+	rm.Clients[client] = true
 
 	// listen client's message
 	client.ListenMessage(rm)
@@ -54,7 +54,7 @@ func (rm *RoomManager) AddClientToRoom(client *Client) {
 
 func (rm *RoomManager) RemoveClientFromRoom(client *Client) {
 
-	_, ok := rm.clients[client]
+	_, ok := rm.Clients[client]
 
 	if !ok {
 		log.Println("client is not in room!")
@@ -65,9 +65,7 @@ func (rm *RoomManager) RemoveClientFromRoom(client *Client) {
 
 	client.RemoveListener(rm)
 
-	delete(rm.clients, client)
-
-
+	delete(rm.Clients, client)
 }
 
 func (rm *RoomManager) ReceiveMessage(client *Client, message []byte) {
@@ -75,7 +73,7 @@ func (rm *RoomManager) ReceiveMessage(client *Client, message []byte) {
 }
 
 func (rm *RoomManager) run() {
-	log.Println("start {} room manager.", rm.Path)
+	log.Printf("start %s room manager.", rm.Path)
 	rm.RoomEvents.OnInit()
 
 	duration := rm.Config.SimulationTick
@@ -84,6 +82,16 @@ func (rm *RoomManager) run() {
 		rm.RoomEvents.OnUpdate(delta)
 	})
 
-	gl.Start()
 
+	gl.Start()
+}
+
+// used inside of the room instance
+func (rm *RoomManager) Kick(client *Client) {
+	rm.RemoveClientFromRoom(client)
+}
+
+func (rm *RoomManager) DisconnectClient(client *Client) {
+	rm.RoomEvents.OnDisconnect(client)
+	rm.RemoveClientFromRoom(client)
 }
