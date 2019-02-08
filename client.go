@@ -35,7 +35,6 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
-
 	hub *Hub
 
 	// The websocket connection.
@@ -54,21 +53,31 @@ type ClientListener interface {
 }
 
 // send message to client
-func (c *Client) SendMessage(message []byte){
+func (c *Client) SendMessage(message []byte) {
 	c.send <- message
 }
 
+func (c *Client) SendMessageStr(message string) {
+	c.SendMessage([]byte(message))
+}
+
 //
-func (c *Client) ListenMessage(listener interface{}){
+func (c *Client) ListenMessage(listener interface{}) {
 
 	clientListener, ok := listener.(ClientListener)
 
 	if ok {
 		c.listeners[clientListener] = true
-		log.Println("deneme")
 	}
 }
 
+func (c *Client) RemoveListener(listener interface{}){
+	clientListener, ok := listener.(ClientListener)
+
+	if ok {
+		delete(c.listeners, clientListener)
+	}
+}
 
 // readPump pumps messages from the websocket connection to the hub.
 //
@@ -148,14 +157,14 @@ func (c *Client) writePump() {
 }
 
 // serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request)  *Client{
+func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) *Client {
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), listeners: make( map[ClientListener]bool)}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), listeners: make(map[ClientListener]bool)}
 	client.hub.register <- client
 	log.Println("serve ws starting..")
 

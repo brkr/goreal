@@ -18,9 +18,9 @@ type RoomConfig struct {
 	MaxUser        int
 	SimulationTick int
 }
-
+// new room manager
 func newRoomManager(path string, roomEvents RoomEvents) *RoomManager {
-	config := &RoomConfig{MaxUser: 1000, SimulationTick: 30}
+	config := &RoomConfig{MaxUser: 1000, SimulationTick: 10}
 	return &RoomManager{RoomEvents: roomEvents, Path: path, Config: config, clients: make(map[*Client]bool)}
 }
 
@@ -29,26 +29,48 @@ func (rm *RoomManager) OnInit(gs *GameServer) {
 	rm.RoomEvents.Init(gs, rm.clients, rm.Config)
 }
 
-func (rm *RoomManager) OnClientJoin(client *Client) bool {
-	canJoin := rm.RoomEvents.OnJoinRequest(client)
-	if !canJoin {
-		log.Println("Room is not available for client")
-		return false
+func (rm *RoomManager) CanJoinTheRoom(client *Client) bool {
+	// todo check if client already join
+
+	_, ok := rm.clients[client]
+	if ok {
+		log.Println("Client is already join.")
+		return true
 	}
+
+	canJoin := rm.RoomEvents.OnJoinRequest(client)
+	return canJoin
+}
+func (rm *RoomManager) AddClientToRoom(client *Client) {
 
 	rm.clients[client] = true
 
-	log.Printf("len=%d", len(rm.clients))
-
-	rm.RoomEvents.OnClientJoin(client)
-
-	//register for listen to client messages
+	// listen client's message
 	client.ListenMessage(rm)
 
-	return true
+	// send join information to room
+	rm.RoomEvents.OnClientJoin(client)
 }
 
-func (rm *RoomManager) ReceiveMessage(client *Client, message []byte){
+func (rm *RoomManager) RemoveClientFromRoom(client *Client) {
+
+	_, ok := rm.clients[client]
+
+	if !ok {
+		log.Println("client is not in room!")
+		return
+	}
+
+	rm.RoomEvents.OnLeave(client)
+
+	client.RemoveListener(rm)
+
+	delete(rm.clients, client)
+
+
+}
+
+func (rm *RoomManager) ReceiveMessage(client *Client, message []byte) {
 	rm.RoomEvents.OnMessage(client, message)
 }
 

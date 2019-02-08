@@ -17,12 +17,15 @@ type RoomEvents interface {
 
 	Init(gs *GameServer, clients map[*Client]bool, config *RoomConfig)
 
-	// todo OnLeave()
+	// client leave from the room.
+	OnLeave(client *Client)
+
 	// todo OnDisconnect()
 }
 
 //
 type Room struct {
+	Name string
 	roomEvents *RoomEvents
 	GameServer *GameServer
 	Clients    map[*Client]bool
@@ -45,14 +48,19 @@ func (rm *Room) OnJoinRequest(client *Client) bool { return true }
 
 func (rm *Room) OnClientJoin(client *Client) {}
 
+func (rm *Room) OnLeave(client *Client) {}
+
 // tum clientlara broadcast mesaj gonderir.
-func (rm *Room) BroadcastMessage(message []byte) {
+func (rm *Room) BroadcastMessage(message string) {
 
 	if len(rm.Clients) == 0 {
 		return
 	}
 
 	for k := range rm.Clients {
-		k.SendMessage(message)
+		k.SendMessageStr(message)
 	}
 }
+
+
+

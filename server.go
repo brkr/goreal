@@ -8,8 +8,12 @@ import (
 
 //Game server manager.
 type GameServer struct {
-	Port  int16
+	// running port
+	Port int16
+	// all rooms in game server
 	rooms map[string]*RoomManager
+	// handle client's first connection
+	InitClient func(w http.ResponseWriter, r *http.Request, client *Client)
 }
 
 // create a new server
@@ -35,8 +39,9 @@ func (gs *GameServer) Start() {
 		//client connection starting
 		client := serveWs(hub, w, r)
 
-		// todo bu kisim gs.JoinRoom('roomName') seklinde gelistirilecek.
-		gs.rooms["lobby"].OnClientJoin(client)
+		if gs.InitClient != nil {
+			gs.InitClient(w, r, client)
+		}
 	})
 
 	// connection string addr:port
@@ -78,4 +83,35 @@ func (gs *GameServer) RegisterRoom(path string, roomInterface interface{}) {
 func (gs *GameServer) bootstrapRoom(roomManager *RoomManager) {
 	roomManager.OnInit(gs)
 	go roomManager.run()
+}
+
+// change the client's room
+func (gs *GameServer) JoinRoom(roomName string, client *Client) bool {
+	// todo check if room created
+	// todo if client is another room, must be leave current room
+
+	room, ok := gs.rooms[roomName]
+	if !ok {
+		log.Printf("Room not found! %s", roomName)
+		return false
+	}
+
+	canJoin := room.CanJoinTheRoom(client)
+	if !canJoin {
+		log.Println("Room is not available for client")
+		return false
+	}
+
+	// send client to room information
+	client.SendMessageStr("{\"join_room\":\"" + roomName + "\"}")
+	room.AddClientToRoom(client)
+
+	return true
+}
+
+func (gs *GameServer) LeaveFromRoom(client *Client, room *Room )  {
+
+	client.RemoveListener(room)
+
+
 }
