@@ -39,5 +39,4 @@ func (rm *RoomManager) run() {
 	})
 
 	gl.Start()
-
 }

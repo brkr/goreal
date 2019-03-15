@@ -15,6 +15,7 @@ type RoomEvents interface {
 	//clienttan mesaj geldiginde
 	OnMessage()
 
+	// when before room runing
 	Init(gs *GameServer, clients *[]Client, config *RoomConfig)
 }
 

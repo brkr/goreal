@@ -33,6 +33,7 @@ func (l *Lobby) onClientJoin(client *goreal.Client) {
 
 func (l *Lobby) OnUpdate(delta float64) {
 	log.Println("update game simulation delta time: ", delta)
+
 }
 
 func NewLobby() *Lobby {
