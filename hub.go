@@ -4,19 +4,19 @@ import (
 	"log"
 )
 
-// Hub maintains the set of active clients and broadcasts messages to the
-// clients.
+// Hub maintains the set of active Clients and broadcasts messages to the
+// Clients.
 type Hub struct {
-	// Registered clients.
+	// Registered Clients.
 	clients map[*Client]bool
 
-	// Inbound messages from the clients.
+	// Inbound messages from the Clients.
 	broadcast chan []byte
 
-	// Register requests from the clients.
+	// Register requests from the Clients.
 	register chan *Client
 
-	// Unregister requests from clients.
+	// Unregister requests from Clients.
 	unregister chan *Client
 }
 
@@ -29,21 +29,25 @@ func newHub() *Hub {
 	}
 }
 
-func (h *Hub) run() {
+func (h *Hub) run(gs *GameServer) {
 	for {
 		select {
 		case client := <-h.register:
 			log.Println("client register")
-			log.Println(client)
 			h.clients[client] = true
+
 		case client := <-h.unregister:
+			// client was disconnected
 			log.Println("client unregister")
+
+			gs.DisconnectClient(client)
 
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
 			}
 		case message := <-h.broadcast:
+			// send broadcast message to all Clients
 			log.Println("message from client")
 			for client := range h.clients {
 				select {
