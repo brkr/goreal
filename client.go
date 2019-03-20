@@ -185,7 +185,6 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) *Client {
 
 // put data
 func (c *Client) Put(key string, data interface{}) {
-
 	c.data[key] = data
 }
 
