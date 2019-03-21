@@ -109,7 +109,7 @@ func (gs *GameServer) JoinRoom(roomName string, client *Client) bool {
 	}
 
 	// send client to room information
-	client.SendMessageStr("{\"join_room\":\"" + roomName + "\"}")
+	//client.SendMessageStr("{\"join_room\":\"" + roomName + "\"}")
 
 	// keep clients room
 	gs.clientRoom[client]=roomName
