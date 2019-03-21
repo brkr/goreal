@@ -45,6 +45,8 @@ type Client struct {
 
 	// client message's listeners
 	listeners map[ClientListener]bool
+
+	data map[string]interface{}
 }
 
 type ClientListener interface {
@@ -160,11 +162,16 @@ func (c *Client) writePump() {
 func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) *Client {
 
 	conn, err := upgrader.Upgrade(w, r, nil)
+
+	//todo add managable logic
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		return true
+	}
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), listeners: make(map[ClientListener]bool)}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), listeners: make(map[ClientListener]bool), data: make(map[string]interface{})}
 	client.hub.register <- client
 	log.Println("serve ws starting..")
 
@@ -174,4 +181,13 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) *Client {
 	go client.readPump()
 
 	return client
+}
+
+// put data
+func (c *Client) Put(key string, data interface{}) {
+	c.data[key] = data
+}
+
+func (c *Client) Get(key string) interface{} {
+	return c.data[key]
 }

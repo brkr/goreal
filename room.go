@@ -31,11 +31,11 @@ type RoomOperation interface {
 
 //
 type Room struct {
-	Name string
-	GameServer *GameServer
-	Clients    map[*Client]bool
-	Config     *RoomConfig
-	RoomOperation  RoomOperation
+	Name          string
+	GameServer    *GameServer
+	Clients       map[*Client]bool
+	Config        *RoomConfig
+	RoomOperation RoomOperation
 }
 
 func (r *Room) Init(gs *GameServer, clients map[*Client]bool, config *RoomConfig, operation interface{}) {
@@ -57,7 +57,7 @@ func (rm *Room) OnJoinRequest(client *Client) bool { return true }
 
 func (rm *Room) OnClientJoin(client *Client) {}
 
-func (rm *Room) OnLeave(client *Client) {}
+func (rm *Room) OnLeave(client *Client)      {}
 func (rm *Room) OnDisconnect(client *Client) {}
 
 // tum clientlara broadcast mesaj gonderir.
@@ -72,5 +72,14 @@ func (rm *Room) BroadcastMessage(message string) {
 	}
 }
 
+// send byte
+func (rm *Room) BroadcastMessageByte(message []byte) {
 
+	if len(rm.Clients) == 0 {
+		return
+	}
 
+	for k := range rm.Clients {
+		k.SendMessage(message)
+	}
+}

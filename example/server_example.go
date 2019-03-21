@@ -56,7 +56,9 @@ func (l *Lobby) OnMessage(client *goreal.Client, message []byte) {
 
 func (l *Lobby) OnClientJoin(client *goreal.Client) {
 	log.Println("lobby onClientJoin")
-
+	client.SendMessage([]byte("helloo"))
+	client.SendMessage([]byte("helloo"))
+	client.SendMessage([]byte("helloo"))
 	if l.State.Player1 == nil {
 		client.SendMessage([]byte("You're player 1."))
 		l.State.Player1 = client
