@@ -81,6 +81,10 @@ func (c *Client) RemoveListener(listener interface{}) {
 	}
 }
 
+func (c *Client) CloseConnection() {
+	c.hub.unregister <- c
+}
+
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application
@@ -140,11 +144,11 @@ func (c *Client) writePump() {
 			w.Write(message)
 
 			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.send)
-			}
+			//n := len(c.send)
+			//for i := 0; i < n; i++ {
+			//	w.Write(newline)
+			//	w.Write(<-c.send)
+			//}
 
 			if err := w.Close(); err != nil {
 				return
@@ -160,13 +164,13 @@ func (c *Client) writePump() {
 
 // serveWs handles websocket requests from the peer.
 func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) *Client {
-
-	conn, err := upgrader.Upgrade(w, r, nil)
-
-	//todo add managable logic
+	// disable check origin
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+
 	if err != nil {
 		log.Println(err)
 		return nil

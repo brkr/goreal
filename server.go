@@ -28,8 +28,7 @@ func NewGameServer(port int16) *GameServer {
 }
 
 func (gs *GameServer) init() {
-	log.Println("game server init")
-	log.Println(gs.rooms)
+
 }
 
 func (gs *GameServer) Start() {
@@ -41,6 +40,10 @@ func (gs *GameServer) Start() {
 		log.Println("ws request detected")
 		//client connection starting
 		client := serveWs(hub, w, r)
+
+		if client == nil {
+			 panic("something went wrong.")
+		}
 
 		if gs.InitClient != nil {
 			gs.InitClient(w, r, client)
@@ -131,11 +134,13 @@ func (gs *GameServer) DisconnectClient(client *Client) {
 	if !ok {
 		// client not be found any room
 		log.Println("client not be found any room")
+		return
 	}
 
 	room, isFound := gs.rooms[roomName]
 	if !isFound {
 		log.Printf("%s room not found.", roomName)
+		return
 	}
 
 	room.DisconnectClient(client)
