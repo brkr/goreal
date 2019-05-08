@@ -120,10 +120,7 @@ func (gs *GameServer) JoinRoom(roomName string, client *Client) bool {
 }
 
 func (gs *GameServer) LeaveFromRoom(client *Client, room *Room )  {
-
 	client.RemoveListener(room)
-
-
 }
 
 // client disconnect unexpectedly

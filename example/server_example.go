@@ -85,9 +85,14 @@ func (l *Lobby) OnUpdate(delta float64) {
 	l.State.counter++
 	l.BroadcastMessage(fmt.Sprintf("User Count %d .State %d", len(l.Clients), l.State.counter))
 
-	if l.State.counter%15 == 0 && l.State.Player1 != nil {
-		log.Println("kick")
-		l.RoomOperation.Kick(l.State.Player1)
+	if l.State.counter%5 == 0 && l.State.Player1 != nil {
+
+		//l.RoomOperation.Kick(l.State.Player1)
+		//panic("unknown panic")
+		a := 0
+		xx := 1 / a
+
+		log.Println(xx)
 	}
 }
 

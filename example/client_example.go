@@ -14,6 +14,7 @@ func main() {
 	gameClient.OnMessage(func(message []byte) {
 		log.Println(string(message))
 	})
+
 	gameClient.Connect()
 
 	ticker := time.NewTicker(time.Second * 15)

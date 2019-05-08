@@ -73,12 +73,18 @@ func (rm *RoomManager) ReceiveMessage(client *Client, message []byte) {
 }
 
 func (rm *RoomManager) run() {
+
 	log.Printf("start %s room manager.", rm.Path)
 	rm.RoomEvents.OnInit()
 
 	duration := rm.Config.SimulationTick
 
 	gl := gameLoop.New(time.Duration(duration), func(delta float64) {
+		defer func() {
+			if error := recover(); error != nil {
+				log.Printf("Runtime Error FROM Room: %s, Err: %v", rm.Path, error)
+			}
+		}()
 		rm.RoomEvents.OnUpdate(delta)
 	})
 
