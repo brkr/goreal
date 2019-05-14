@@ -88,6 +88,7 @@ func (gs *GameServer) RegisterRoom(path string, roomInterface interface{}) {
 
 func (gs *GameServer) bootstrapRoom(roomManager *RoomManager) {
 	roomManager.OnInit(gs)
+	roomManager.RoomEvents.OnInit()
 	go roomManager.run()
 }
 

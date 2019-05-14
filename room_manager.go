@@ -75,7 +75,7 @@ func (rm *RoomManager) ReceiveMessage(client *Client, message []byte) {
 func (rm *RoomManager) run() {
 
 	log.Printf("start %s room manager.", rm.Path)
-	rm.RoomEvents.OnInit()
+	//rm.RoomEvents.OnInit()
 
 	duration := rm.Config.SimulationTick
 

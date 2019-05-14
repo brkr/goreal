@@ -2,23 +2,36 @@ package main
 
 import (
 	"fmt"
+	"github.com/brkr/goreal"
 	"log"
 	"net/http"
-
-	"github.com/brkr/goreal"
+	"sync/atomic"
 )
 
 func main() {
 	gameServer := goreal.NewGameServer(1111)
 	log.Println(gameServer.Port)
-	lobby := &Lobby{}
+	//lobby := &Lobby{}
+
+	var roomNumber uint64
 
 	gameServer.InitClient = func(w http.ResponseWriter, r *http.Request, client *goreal.Client) {
-		log.Println("new user handler")
-		gameServer.JoinRoom("lobby", client)
+
+		isJoinRoom := gameServer.JoinRoom("lobby", client)
+		if !isJoinRoom {
+			// user not in
+			roomName := fmt.Sprintf("lobby-%d", roomNumber)
+			atomic.AddUint64(&roomNumber, 1)
+			log.Printf("room count : %d", roomNumber)
+			log.Println(roomName)
+			room := &Lobby{}
+			gameServer.RegisterRoom(roomName, room)
+			gameServer.JoinRoom(roomName, client)
+
+		}
 	}
 
-	gameServer.RegisterRoom("lobby", lobby)
+	//gameServer.RegisterRoom("lobby", lobby)
 	gameServer.Start()
 
 }
@@ -37,7 +50,7 @@ type Lobby struct {
 func (l *Lobby) OnJoinRequest(client *goreal.Client) bool {
 	log.Println("lobby onJoinRequest")
 
-	if len(l.Clients) >= 2 {
+	if len(l.Clients) >= 1 {
 		log.Println("room is full")
 		return false
 	}
@@ -56,9 +69,7 @@ func (l *Lobby) OnMessage(client *goreal.Client, message []byte) {
 
 func (l *Lobby) OnClientJoin(client *goreal.Client) {
 	log.Println("lobby onClientJoin")
-	client.SendMessage([]byte("helloo"))
-	client.SendMessage([]byte("helloo"))
-	client.SendMessage([]byte("helloo"))
+	client.SendMessage([]byte("Welcome to game room"))
 	if l.State.Player1 == nil {
 		client.SendMessage([]byte("You're player 1."))
 		l.State.Player1 = client
@@ -89,10 +100,6 @@ func (l *Lobby) OnUpdate(delta float64) {
 
 		//l.RoomOperation.Kick(l.State.Player1)
 		//panic("unknown panic")
-		a := 0
-		xx := 1 / a
-
-		log.Println(xx)
 	}
 }
 
